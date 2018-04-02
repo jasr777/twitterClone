@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <title>Document</title>
+</head>
+
+<body>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="user-tab" data-toggle="tab" href="#userspanel" role="tab" aria-controls="home" aria-selected="true">Usuarios</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tweet-tab" data-toggle="tab" href="#tweetspanel" role="tab" aria-controls="profile" aria-selected="false">Tweets</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#timeline" role="tab" aria-controls="contact" aria-selected="false">Timeline</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+        <!--- PANEL DE USUARIO -->
+        <div class="tab-pane fade show active" id="userspanel" role="tabpanel" aria-labelledby="home-tab">
+            <form class="col-md-12" action="//localhost:3000/api/users" method="post">
+                <h2> Creacion de usuarios</h2>
+                <div class="form-group">
+                    <label for="username">Nombre de Usuario</label>
+                    <input type="text" class="form-control" id="mail" name="username" aria-describedby="emailHelp" placeholder="Introduce un nombre de usuario">
+                    <small id="emailHelp" class="form-text text-muted">No dejes este campo vacío!</small>
+                    <label for="name">Tu Nombre</label>
+                    <input type="text" class="form-control" id="mail" name="name" aria-describedby="emailHelp" placeholder="Introduce tu nombre">
+                    <label for="email">Email address</label>
+                    <input type="email" class="form-control" id="mail" name="email" aria-describedby="emailHelp" placeholder="Introduce nombre de usuario">
+                </div>
+                <button type="submit" class="btn btn-primary">Crear</button>
+            </form>
+        </div>
+        <!-- PANEL DE TWEETS -->
+        <div class="tab-pane fade" id="tweetspanel" role="tabpanel" aria-labelledby="profile-tab">
+            <form action="//localhost:3000/api/tweets" method="post" class="col-md-6">
+                <div class="form-group">
+                    <h2>Creacion de Tweets</h2>
+                    <div class="form-group">
+                        <label for="owner">Selecciona usuario con el que escribir el twit</label>
+                        <select class="form-control" id="owner" name="owner">
+                        </select>
+                        <label for="text">Escribe tu micropost</label>
+                        <textarea class="form-control" id="text" name="text" rows="3"></textarea>
+                        <button type="submit" class="btn btn-primary">Crear Tweet</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        <!-- PANEL RESTANTE -->
+        <div class="tab-pane fade" id="timeline" role="tabpanel" aria-labelledby="contact-tab">
+            <form class="col-md-6">
+                <div class="form-group">
+                    <h2>Creacion de Tweets</h2>
+                    <div class="form-group">
+                        <label for="ownertimeline">Selecciona usuario del que quieres ver su timeline</label>
+                        <select class="form-control" id="ownertimeline" name="owner">
+                        </select>
+                        <div id="usertimeline"></div>
+                    </div>
+                </div>
+            </form>
+            <button id="btntimeline" class="btn btn-primary">Ver Timeline</button>
+
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+
+    <script>
+        let todosLosUsuarios = [];
+        let todosLosTweets = [];
+        let tweetsUsuario = [];
+
+        $('#tweet-tab').click( (event) => {
+            //event.preventDefault();
+
+            $.get('//localhost:3000/api/users')
+             .then (response => {
+                 console.log(response);
+                 response.forEach(user => {
+                     $('#owner').append(`<option>${user.username}</option>`);                    
+                 })
+             })
+             .catch(error => {
+                 console.log(error.text);
+             })
+        })
+/*
+        $('#tweet-tab').click(() => {
+            $.get('//localhost:3000/api/users')
+                .then(response => {
+                    console.log(response);
+                    todosLosUsuarios = response.splice(0);
+                    console.log(todosLosUsuarios);
+                    todosLosUsuarios.forEach(user => {
+                        $('#owner').append(`<option>${user.username}</option>`)
+                        $('#ownertimeline').append(`<option>${user.username}</option>`)
+                    })
+                })
+                .catch(error => console.log(error.text));
+        })
+        $('#btntimeline').click(() => {
+            console.log($('#ownertimeline').val());
+            $.get(`//localhost:3000/api/users/${$('#ownertimeline').val()}/tweets}`)
+                .then(response => {
+                    console.log(response);
+                    response.forEach(tweet => {
+                        $('#usertimeline').append('<div class="border">');
+                        $('#usertimeline').append(`<strong>Tweet:</strong> <p> ${tweet.text}</p>`);
+                        $('#usertimeline').append('</div>');
+
+                    })
+                })
+                .catch(error => {
+                    console.log(error.text);
+                })*/
+    </script>
+</body>
+
+</html>
