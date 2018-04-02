@@ -19,16 +19,16 @@ y devolver el error en la respuesta y el código correcto para el caso que aplic
 
 
 
-var express = require('express');
-var cors = require('cors');
-var bodyParser = require('body-parser');
-var app = express();
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const app = express();
+
 app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(bodyParser.json());
 app.use(cors());
-
 /*
  User structure : {
 

@@ -8,12 +8,15 @@
 * DELETE /api/users/:username => deleteUser
 * PATCH /api/users/:username => updateUser
 *********/
-var users = [
+
+const USERModel = require('./users.model');
+
+/* var users = [
     {
-        username : "uno",
-        name : "uno",
-        email : "uno@uno.com",
-        tweets : ["pr5xw"]
+        username: "uno",
+        name: "uno",
+        email: "uno@uno.com",
+        tweets: ["pr5xw"]
     },
     {
         username: "dos",
@@ -21,42 +24,50 @@ var users = [
         email: "doso@dos.com",
         tweets: ["1"]
     }
-];
+]; */
 module.exports = {
-    getAll : getAll,
-    getUser : getUser,
-    getUserTweets : getUserTweets,
-    createUser : createUser,
-    deleteUser : deleteUser,
-    updateUser : updateUser,
-    updateUserTweets : updateUserTweets   
+    getAll: getAll,
+    getUser: getUser,
+    getUserTweets: getUserTweets,
+    createUser: createUser,
+    deleteUser: deleteUser,
+    updateUser: updateUser,
+    updateUserTweets: updateUserTweets
 }
 
-function getAll( req, res ) {
+function getAll(req, res) {
     console.log("get request all users");
-    res.json(users);
-    
+    USERModel.find().then( response => {
+        res.json(response);
+
+    })
+
 }
 
-function getUser( req, res ) {
+function getUser(req, res) {
     const userToFind = req.params.username;
-    const user  = users.find( usr => usr.username === userToFind);
-    
-    if (user ){
-        res.json(user);
+    let user;
+    USERModel.find( {"username" : userToFind}).then(
+        response => {            
+            if (response.length > 0 ) {
+                res.json(response);
         
-    }  else { 
-        return res.status(400).send("User doesn't exist");
-    }
+            } else {
+                return res.status(400).send("User doesn't exist");
+            }
+        }
+    ).catch(err => {
+        console.log(err);
+    });
 }
 
-function getUserTweets (req, res) {
-    console.log(req.params);    
+function getUserTweets(req, res) {
+    console.log(req.params);
     const userToFindTweets = req.params.username;
-    const user = users.find( usr => usr.username == userToFindTweets);
+    const user = users.find(usr => usr.username == userToFindTweets);
     console.log(`user to find tweets ${userToFindTweets}`);
     console.log(user);
-    if (user) { 
+    if (user) {
         console.log(user);
         let tweets = getTweetsByUser(user);
         res.json(tweets);
@@ -65,29 +76,38 @@ function getUserTweets (req, res) {
     }
 }
 
-function createUser ( req, res) {
-    if  (req.body.username.length === 0) {
+function createUser(req, res) {
+    if (req.body.username.length === 0) {
         return res.status(400).send("Username is empty");
     }
-    
-    if  (req.body.email.length === 0) {
+
+    if (req.body.email.length === 0) {
         return res.status(400).send("User email is empty");
     }
-    
-    if (users.findIndex( usr => req.body.username === usr.username) >= 0 ){
+
+/*     if (users.findIndex(usr => req.body.username === usr.username) >= 0) {
         return res.status(400).send("Username already exists");
     }
-    const newUser = req.body;
+ */ 
+/*     const newUser = req.body;
     newUser.tweets = [];
     console.log(newUser);
-    users.push(newUser);
+    USERModel.save(;
     res.json(newUser);
+ */
+        let newUser = new USERModel ({
+            "username" : req.body.username,
+            "name" : req.body.name,
+            "email" : req.body.email,
+            "tweets" : []
+        })
+        newUser.save();       
 }
 
-function deleteUser(req,res) {
+function deleteUser(req, res) {
     const userToRemove = req.params.username;
     console.log(userToRemove);
-    
+
     if (userToRemove.length >= 0) {
         users = users.map(usr => userToRemove != usr.username);
         console.log(users);
@@ -103,17 +123,17 @@ function updateUser(req, res) {
     const newName = req.params.newname;
     const newMail = req.params.newMail;
     const user = users.find(user => user.username === userToUpdate);
-    
+
     if (user) {
-        if ( userToUpdate ) {
+        if (userToUpdate) {
             console.log("changing username");
             user.username = newName;
             console.log(user);
             console.log(users);
             return res.status(200).send("User name updated successfully");
         }
-        
-        if (req.body.email ) {
+
+        if (req.body.email) {
             console.log("changing email");
             user.email = req.body.newEmail;
             console.log(user);
@@ -122,7 +142,7 @@ function updateUser(req, res) {
     } else {
         return res.status(404).send("User doesn't exists");
     }
-    
+
 }
 
 function updateUserTweets(tweet) {
